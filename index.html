@@ -425,7 +425,7 @@
       </div>
     </div>
 
-    <button type="submit" class="submit-btn" id="submitBtn">Mitgliedsantrag absenden</button>
+    <button type="submit" class="submit-btn" id="submitBtn" disabled>Mitgliedsantrag absenden</button>
     <div class="form-footer">
       Mit dem Absenden dieses Formulars beantragst du verbindlich die Mitgliedschaft<br>
       im Boulderverein Zugzwang e.V.
@@ -662,6 +662,55 @@ document.addEventListener('DOMContentLoaded',()=>{
   f.querySelectorAll('input[type="checkbox"]').forEach(el=>{
     el.addEventListener('change',()=>{el.closest('.cb-group')?.classList.remove('error');});
   });
+
+  // ── Button erst freigeben wenn alles ausgefüllt ──
+  function checkForm(){
+    let ok=true;
+
+    // Alle required Text/Date/Select-Felder in nicht-family sections
+    f.querySelectorAll('.form-section:not(.family-section) input[required]:not([type="checkbox"]):not([type="radio"]), .form-section:not(.family-section) select[required]').forEach(el=>{
+      if(!el.value.trim()) ok=false;
+    });
+
+    // Kategorie (Radio)
+    if(!f.querySelector('input[name="kategorie"]:checked')) ok=false;
+
+    // Checkboxen
+    f.querySelectorAll('input[type="checkbox"][required]').forEach(el=>{
+      if(!el.checked) ok=false;
+    });
+
+    // E-Mail Format
+    if(em.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value)) ok=false;
+
+    // IBAN gültig
+    const ic=ib.value.replace(/\s/g,'');
+    if(!ic || !valIBAN(ic).ok) ok=false;
+
+    // Familienmitglieder validieren (nur wenn Familie gewählt)
+    if(isFamily()){
+      const members=famList.querySelectorAll('.family-member');
+      if(members.length===0) ok=false;
+      members.forEach(div=>{
+        div.querySelectorAll('input[required]').forEach(el=>{
+          if(!el.value.trim()) ok=false;
+        });
+      });
+    }
+
+    sb.disabled=!ok;
+  }
+
+  // Bei jeder Eingabe prüfen
+  f.addEventListener('input',checkForm);
+  f.addEventListener('change',checkForm);
+
+  // Auch bei Familienmitglied hinzufügen/entfernen
+  const observer=new MutationObserver(checkForm);
+  observer.observe(famList,{childList:true,subtree:true});
+
+  // Initial prüfen
+  checkForm();
 });
 </script>
 </body>
