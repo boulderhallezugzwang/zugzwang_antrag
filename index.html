@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mitgliedsantrag – Boulderverein Zugzwang e.V.</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-section: #f7f7f5;
+    --text: #1a1a1a;
+    --text-muted: #666;
+    --border: #d4d4d4;
+    --border-focus: #2a7d6e;
+    --accent: #2a7d6e;
+    --accent-hover: #1f5f54;
+    --accent-light: #e8f4f1;
+    --error: #c0392b;
+    --error-bg: #fdf0ef;
+    --success: #27ae60;
+    --success-bg: #eafaf1;
+    --radius: 6px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+  }
+  .form-container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+  }
+  .form-header {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--accent);
+  }
+  .form-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .form-header p { font-size: 14px; color: var(--text-muted); }
+  .form-section {
+    background: var(--bg-section);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .form-section h2 {
+    font-size: 15px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--accent);
+    margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .form-row { display: flex; gap: 12px; margin-bottom: 14px; }
+  .form-row.single { flex-direction: column; }
+  .form-group { flex: 1; display: flex; flex-direction: column; }
+  .form-group.small { flex: 0 0 120px; }
+  .form-group.med { flex: 0 0 180px; }
+  label { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  label .req { color: var(--error); margin-left: 2px; }
+
+  input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea {
+    width: 100%; padding: 10px 12px; font-size: 16px; /* 16px prevents iOS zoom */
+    font-family: var(--font);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: #fff; color: var(--text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    -webkit-appearance: none; appearance: none;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(42, 125, 110, 0.12);
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  input.invalid, select.invalid { border-color: var(--error); background: var(--error-bg); }
+  input.valid { border-color: var(--success); }
+
+  .iban-wrap { position: relative; }
+  .iban-wrap input {
+    padding-right: 38px;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    letter-spacing: 1px;
+  }
+  .iban-ico {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    font-size: 18px; pointer-events: none; opacity: 0; transition: opacity 0.2s;
+  }
+  .iban-ico.show { opacity: 1; }
+  .hint { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .ferr { font-size: 12px; color: var(--error); margin-top: 3px; display: none; }
+  .ferr.show { display: block; }
+
+  /* Checkboxes */
+  .cb-group { margin-bottom: 12px; display: flex; align-items: flex-start; gap: 10px; }
+  .cb-group input[type="checkbox"] {
+    margin-top: 3px; flex-shrink: 0; width: 18px; height: 18px;
+    accent-color: var(--accent); cursor: pointer;
+  }
+  .cb-group label { font-size: 14px; font-weight: 400; cursor: pointer; line-height: 1.45; }
+  .cb-group label a { color: var(--accent); text-decoration: underline; }
+
+  /* Radio buttons */
+  .radio-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+  .radio-opt { position: relative; }
+  .radio-opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .radio-opt label {
+    display: inline-block; padding: 8px 16px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 14px; cursor: pointer;
+    background: #fff; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .radio-opt input:checked + label {
+    background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 500;
+  }
+  .radio-opt label:hover { border-color: var(--accent); }
+  .kat-sublabel {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;
+    color: var(--text-muted); margin-bottom: 6px; margin-top: 12px;
+  }
+  .kat-sublabel:first-child { margin-top: 0; }
+
+  /* Info box */
+  .info-box {
+    background: var(--accent-light); border-left: 3px solid var(--accent);
+    padding: 10px 14px; font-size: 13px; border-radius: 0 var(--radius) var(--radius) 0;
+    margin-bottom: 14px; line-height: 1.5;
+  }
+
+  /* Family members */
+  .family-section { display: none; }
+  .family-section.show { display: block; }
+  .family-member {
+    background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px; margin-bottom: 12px; position: relative;
+  }
+  .family-member .fm-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .family-member .fm-label {
+    font-size: 13px; font-weight: 600; color: var(--accent);
+  }
+  .fm-remove {
+    background: none; border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text-muted); font-size: 12px; padding: 4px 10px;
+    cursor: pointer; font-family: var(--font); transition: all 0.15s;
+  }
+  .fm-remove:hover { border-color: var(--error); color: var(--error); }
+  .add-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff; border: 1px dashed var(--border); border-radius: var(--radius);
+    padding: 9px 16px; font-size: 14px; font-family: var(--font);
+    color: var(--accent); cursor: pointer; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    margin-right: 8px; margin-bottom: 8px;
+  }
+  .add-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+
+  /* Submit */
+  .submit-btn {
+    display: block; width: 100%; padding: 14px; font-size: 16px; font-weight: 600;
+    font-family: var(--font); color: #fff; background: var(--accent); border: none;
+    border-radius: var(--radius); cursor: pointer; transition: background 0.2s; margin-top: 8px;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 48px; /* Touch target */
+  }
+  .submit-btn:hover { background: var(--accent-hover); }
+  .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+  .submit-btn.loading { position: relative; color: transparent; }
+  .submit-btn.loading::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 22px; height: 22px; margin: -11px 0 0 -11px;
+    border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff;
+    border-radius: 50%; animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .msg { padding: 20px; border-radius: var(--radius); text-align: center; display: none; }
+  .msg.ok { background: var(--success-bg); border: 1px solid var(--success); color: #1a5632; }
+  .msg.err { background: var(--error-bg); border: 1px solid var(--error); color: var(--error); }
+  .msg h3 { font-size: 18px; margin-bottom: 6px; }
+  .msg p { font-size: 14px; }
+  .msg p a { color: inherit; }
+  .form-footer { text-align: center; margin-top: 20px; font-size: 12px; color: var(--text-muted); }
+
+  /* ── Mobile ── */
+  @media (max-width: 520px) {
+    .form-container { padding: 16px 12px 32px; }
+    .form-row { flex-direction: column; gap: 12px; }
+    .form-group.small, .form-group.med { flex: 1; }
+    .form-header h1 { font-size: 19px; }
+    .form-section { padding: 16px 14px; }
+    .radio-group { gap: 6px; }
+    .radio-opt label { padding: 10px 14px; font-size: 14px; width: 100%; text-align: center; }
+    .family-member { padding: 12px; }
+    .add-btn { width: 100%; justify-content: center; margin-right: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="form-container">
+  <div class="form-header">
+    <h1>Mitgliedsantrag</h1>
+    <p>Boulderverein Zugzwang e.V. – Neuhauser Straße 1, 91275 Auerbach</p>
+  </div>
+
+  <div class="msg ok" id="okMsg">
+    <h3>✓ Antrag erfolgreich gesendet!</h3>
+    <p>Vielen Dank für deinen Mitgliedsantrag. Du erhältst in Kürze eine Bestätigung per E-Mail.</p>
+  </div>
+  <div class="msg err" id="errMsg">
+    <h3>Fehler beim Senden</h3>
+    <p>Bitte versuche es erneut oder kontaktiere uns unter <a href="mailto:info@boulderhalle-auerbach.de">info@boulderhalle-auerbach.de</a></p>
+  </div>
+
+  <form id="mf" novalidate>
+
+    <!-- ─── Persönliche Daten ─── -->
+    <div class="form-section">
+      <h2>Persönliche Daten</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="vorname">Vorname <span class="req">*</span></label>
+          <input type="text" id="vorname" name="vorname" required autocomplete="given-name">
+        </div>
+        <div class="form-group">
+          <label for="nachname">Nachname <span class="req">*</span></label>
+          <input type="text" id="nachname" name="nachname" required autocomplete="family-name">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="geburtsdatum">Geburtsdatum <span class="req">*</span></label>
+          <input type="date" id="geburtsdatum" name="geburtsdatum" required>
+        </div>
+        <div class="form-group">
+          <!-- leer für Layout-Balance -->
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label for="strasse">Straße und Hausnummer <span class="req">*</span></label>
+          <input type="text" id="strasse" name="strasse" required autocomplete="street-address">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group small">
+          <label for="plz">PLZ <span class="req">*</span></label>
+          <input type="text" id="plz" name="plz" required maxlength="10" autocomplete="postal-code">
+        </div>
+        <div class="form-group">
+          <label for="ort">Ort <span class="req">*</span></label>
+          <input type="text" id="ort" name="ort" required autocomplete="address-level2">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">E-Mail <span class="req">*</span></label>
+          <input type="email" id="email" name="email" required autocomplete="email">
+          <div class="ferr" id="emailErr">Bitte gib eine gültige E-Mail-Adresse ein.</div>
+        </div>
+        <div class="form-group">
+          <label for="telefon">Mobilnummer <span class="req">*</span></label>
+          <input type="tel" id="telefon" name="telefon" required autocomplete="tel">
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Mitgliedschaft ─── -->
+    <div class="form-section">
+      <h2>Mitgliedschaft</h2>
+
+      <div class="info-box">
+        Die Mitgliedschaft erstreckt sich immer über ein volles Kalenderjahr.
+        Anträge ab 1. Oktober zahlen erst im Folgejahr.
+      </div>
+
+      <div class="form-row single">
+        <div class="form-group">
+          <label>Mitgliedskategorie <span class="req">*</span></label>
+          <div id="katGrp">
+            <div class="kat-sublabel">Mit Jahreskarte</div>
+            <div class="radio-group">
+              <div class="radio-opt">
+                <input type="radio" id="k1" name="kategorie" value="Mitglied" required>
+                <label for="k1">Mitglied</label>
+              </div>
+              <div class="radio-opt">
+                <input type="radio" id="k2" name="kategorie" value="Mitglied ermäßigt">
+                <label for="k2">Mitglied ermäßigt</label>
+              </div>
+              <div class="radio-opt">
+                <input type="radio" id="k3" name="kategorie" value="Mitglied Familie">
+                <label for="k3">Mitglied Familie</label>
+              </div>
+            </div>
+            <div class="kat-sublabel">Ohne Jahreskarte</div>
+            <div class="radio-group">
+              <div class="radio-opt">
+                <input type="radio" id="k4" name="kategorie" value="Fördermitglied">
+                <label for="k4">Fördermitglied</label>
+              </div>
+              <div class="radio-opt">
+                <input type="radio" id="k5" name="kategorie" value="Fördermitglied ermäßigt">
+                <label for="k5">Fördermitglied ermäßigt</label>
+              </div>
+              <div class="radio-opt">
+                <input type="radio" id="k6" name="kategorie" value="Fördermitglied Familie">
+                <label for="k6">Fördermitglied Familie</label>
+              </div>
+            </div>
+          </div>
+          <div class="ferr" id="katErr">Bitte wähle eine Mitgliedskategorie.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Familienmitglieder (nur bei Familie) ─── -->
+    <div class="form-section family-section" id="familySection">
+      <h2>Familienmitglieder</h2>
+      <div class="info-box">
+        Bitte trage hier die weiteren Familienmitglieder ein, die über diese Familienmitgliedschaft
+        mitangemeldet werden sollen. Jedes Familienmitglied erhält einen eigenen Eintrag.
+      </div>
+
+      <div id="familyList"></div>
+
+      <div style="display:flex;flex-wrap:wrap;">
+        <button type="button" class="add-btn" id="addPartner">+ Ehepartner/Partner</button>
+        <button type="button" class="add-btn" id="addChild">+ Kind</button>
+      </div>
+    </div>
+
+    <!-- ─── SEPA ─── -->
+    <div class="form-section">
+      <h2>SEPA-Lastschriftmandat</h2>
+      <div class="info-box">
+        Ich ermächtige den Boulderverein Zugzwang e.V., Zahlungen von meinem Konto mittels
+        Lastschrift einzuziehen. Zugleich weise ich mein Kreditinstitut an, die vom Verein
+        gezogenen Lastschriften einzulösen.
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label for="kontoinhaber">Kontoinhaber <span class="req">*</span></label>
+          <input type="text" id="kontoinhaber" name="kontoinhaber" required autocomplete="cc-name">
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label for="iban">IBAN <span class="req">*</span></label>
+          <div class="iban-wrap">
+            <input type="text" id="iban" name="iban" required
+                   placeholder="z.B. DE89 3704 0044 0532 0130 00"
+                   autocomplete="off" spellcheck="false">
+            <span class="iban-ico" id="ibanIco"></span>
+          </div>
+          <div class="hint" id="ibanHint">Die IBAN wird automatisch auf Gültigkeit geprüft.</div>
+          <div class="ferr" id="ibanErr">Die eingegebene IBAN ist ungültig.</div>
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label for="bic">BIC (optional, bei internationalen Konten)</label>
+          <input type="text" id="bic" name="bic" placeholder="z.B. COBADEFFXXX" autocomplete="off"
+                 style="font-family:'SF Mono',Consolas,Menlo,monospace;letter-spacing:1px;">
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Kommentar ─── -->
+    <div class="form-section">
+      <h2>Kommentar</h2>
+      <div class="form-row single">
+        <div class="form-group">
+          <label for="kommentar">Anmerkungen oder Fragen (optional)</label>
+          <textarea id="kommentar" name="kommentar" rows="3"
+                    placeholder="z.B. besondere Hinweise, Fragen zur Mitgliedschaft …"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Einverständnis ─── -->
+    <div class="form-section">
+      <h2>Einverständniserklärungen</h2>
+      <div class="cb-group">
+        <input type="checkbox" id="satzung" name="satzung" required>
+        <label for="satzung">
+          Ich erkenne die <a href="https://zugzwang.clubdesk.com/verein/info" target="_blank">Satzung</a>
+          des Boulderverein Zugzwang e.V. an und verpflichte mich, den Vereinsbeitrag zu entrichten. <span class="req">*</span>
+        </label>
+      </div>
+      <div class="cb-group">
+        <input type="checkbox" id="dsgvo" name="dsgvo" required>
+        <label for="dsgvo">
+          Ich stimme der Verarbeitung meiner personenbezogenen Daten gemäß der
+          <a href="https://zugzwang.clubdesk.com/verein/datenschutz" target="_blank">Datenschutzerklärung</a>
+          des Vereins zu. <span class="req">*</span>
+        </label>
+      </div>
+      <div class="cb-group">
+        <input type="checkbox" id="sepa_consent" name="sepa_consent" required>
+        <label for="sepa_consent">
+          Ich erteile das oben genannte SEPA-Lastschriftmandat. <span class="req">*</span>
+        </label>
+      </div>
+      <div class="cb-group">
+        <input type="checkbox" id="arbeitsdienst" name="arbeitsdienst" required>
+        <label for="arbeitsdienst">
+          Ich verpflichte mich, mindestens einmal im Jahr an einem Arbeitsdienst teilzunehmen. <span class="req">*</span>
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">Mitgliedsantrag absenden</button>
+    <div class="form-footer">
+      Mit dem Absenden dieses Formulars beantragst du verbindlich die Mitgliedschaft<br>
+      im Boulderverein Zugzwang e.V.
+    </div>
+  </form>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// KONFIGURATION
+// ═══════════════════════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDf2dLnMzKaenvKw-UA_X_WXd04XhQ7feoSIRcEC54qx8_dTFddnlUJ5203LA9xSFE/exec';
+
+// ═══════════════════════════════════════════════════
+// IBAN
+// ═══════════════════════════════════════════════════
+const IL={AL:28,AD:24,AT:20,AZ:28,BH:22,BY:28,BE:16,BA:20,BR:29,BG:22,CR:22,HR:21,CY:28,CZ:24,DK:18,DO:28,TL:23,EE:20,FO:18,FI:18,FR:27,GE:22,DE:22,GI:23,GR:27,GL:18,GT:28,HU:28,IS:26,IQ:23,IE:22,IL:23,IT:27,JO:30,KZ:20,XK:20,KW:30,LV:21,LB:28,LI:21,LT:20,LU:20,MK:19,MT:31,MR:27,MU:30,MC:27,MD:24,ME:22,NL:18,NO:15,PK:24,PS:29,PL:28,PT:25,QA:29,RO:24,SM:27,SA:24,RS:22,SK:24,SI:19,ES:24,SE:24,CH:21,TN:24,TR:26,AE:23,GB:22,VA:22,VG:24,UA:29};
+function fmtIBAN(r){return r.replace(/\s/g,'').toUpperCase().replace(/(.{4})/g,'$1 ').trim();}
+function valIBAN(iban){
+  const c=iban.replace(/\s/g,'').toUpperCase();
+  if(c.length<5)return{ok:false,why:'short'};
+  if(!/^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/.test(c))return{ok:false,why:'format'};
+  const cc=c.substring(0,2),el=IL[cc];
+  if(!el)return{ok:false,why:'country'};
+  if(c.length!==el)return{ok:false,why:'length',ex:el};
+  const re=c.substring(4)+c.substring(0,4);
+  let ns='';
+  for(const ch of re)ns+=(ch>='0'&&ch<='9')?ch:(ch.charCodeAt(0)-55).toString();
+  let rm=0;
+  for(let i=0;i<ns.length;i++)rm=(rm*10+parseInt(ns[i]))%97;
+  return rm===1?{ok:true}:{ok:false,why:'checksum'};
+}
+
+// ═══════════════════════════════════════════════════
+// FORMULAR-LOGIK
+// ═══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  const f=document.getElementById('mf'),
+        ib=document.getElementById('iban'),
+        ico=document.getElementById('ibanIco'),
+        ie=document.getElementById('ibanErr'),
+        ih=document.getElementById('ibanHint'),
+        em=document.getElementById('email'),
+        ee=document.getElementById('emailErr'),
+        sb=document.getElementById('submitBtn'),
+        famSec=document.getElementById('familySection'),
+        famList=document.getElementById('familyList');
+
+  // ── Familien-Sektion ein/ausblenden ──
+  let fmCounter=0;
+  function isFamily(){
+    const sel=f.querySelector('input[name="kategorie"]:checked');
+    return sel && sel.value.includes('Familie');
+  }
+  function toggleFamily(){
+    if(isFamily()){
+      famSec.classList.add('show');
+    }else{
+      famSec.classList.remove('show');
+    }
+  }
+  f.querySelectorAll('input[name="kategorie"]').forEach(el=>{
+    el.addEventListener('change',()=>{
+      toggleFamily();
+      document.getElementById('katErr').classList.remove('show');
+    });
+  });
+
+  // ── Familienmitglied hinzufügen ──
+  function addFamilyMember(type){
+    fmCounter++;
+    const id=fmCounter;
+    const lbl=type==='partner'?'Ehepartner / Partner':'Kind';
+    const div=document.createElement('div');
+    div.className='family-member';
+    div.dataset.fmId=id;
+    div.innerHTML=`
+      <div class="fm-header">
+        <span class="fm-label">${lbl}</span>
+        <button type="button" class="fm-remove" onclick="this.closest('.family-member').remove()">Entfernen</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fm_vn_${id}">Vorname <span class="req">*</span></label>
+          <input type="text" id="fm_vn_${id}" data-fm="vorname" required>
+        </div>
+        <div class="form-group">
+          <label for="fm_nn_${id}">Nachname <span class="req">*</span></label>
+          <input type="text" id="fm_nn_${id}" data-fm="nachname" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fm_gd_${id}">Geburtsdatum <span class="req">*</span></label>
+          <input type="date" id="fm_gd_${id}" data-fm="geburtsdatum" required>
+        </div>
+        <div class="form-group">
+          <!-- Platz -->
+        </div>
+      </div>
+    `;
+    famList.appendChild(div);
+    // Scroll to new member on mobile
+    div.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  document.getElementById('addPartner').addEventListener('click',()=>addFamilyMember('partner'));
+  document.getElementById('addChild').addEventListener('click',()=>addFamilyMember('child'));
+
+  // ── IBAN Echtzeit ──
+  let to;
+  ib.addEventListener('input',e=>{
+    let r=e.target.value.replace(/\s/g,'').toUpperCase();
+    e.target.value=fmtIBAN(r);
+    clearTimeout(to);
+    ib.classList.remove('valid','invalid');
+    ico.classList.remove('show');ie.classList.remove('show');ih.style.display='';
+    if(r.length<5)return;
+    to=setTimeout(()=>{
+      const v=valIBAN(r);
+      ico.classList.add('show');
+      if(v.ok){
+        ib.classList.add('valid');ib.classList.remove('invalid');
+        ico.textContent='✓';ico.style.color='var(--success)';
+        ie.classList.remove('show');ih.style.display='none';
+      }else{
+        ib.classList.add('invalid');ib.classList.remove('valid');
+        ico.textContent='✗';ico.style.color='var(--error)';ih.style.display='none';
+        const m={format:'Ungültiges Format. IBAN muss mit Ländercode beginnen (z.B. DE).',
+          country:'Unbekannter Ländercode.',
+          length:`Falsche Länge. ${r.substring(0,2)}-IBANs haben ${v.ex} Zeichen.`,
+          checksum:'Prüfziffer ungültig – bitte IBAN überprüfen.',short:''};
+        if(m[v.why]){ie.textContent=m[v.why];ie.classList.add('show');}
+      }
+    },400);
+  });
+
+  // ── E-Mail ──
+  em.addEventListener('blur',()=>{
+    const ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value);
+    if(em.value&&!ok){em.classList.add('invalid');ee.classList.add('show');}
+    else{em.classList.remove('invalid');ee.classList.remove('show');}
+  });
+
+  // ── Familienmitglieder sammeln ──
+  function getFamilyMembers(){
+    const members=[];
+    famList.querySelectorAll('.family-member').forEach(div=>{
+      const vn=div.querySelector('[data-fm="vorname"]').value.trim();
+      const nn=div.querySelector('[data-fm="nachname"]').value.trim();
+      const gd=div.querySelector('[data-fm="geburtsdatum"]').value;
+      if(vn&&nn&&gd) members.push({vorname:vn,nachname:nn,geburtsdatum:gd});
+    });
+    return members;
+  }
+
+  // ── Submit ──
+  f.addEventListener('submit',async e=>{
+    e.preventDefault();
+    let err=false;
+
+    // Standard-Pflichtfelder
+    f.querySelectorAll('.form-section:not(.family-section) [required]').forEach(el=>{
+      if(el.type==='checkbox'&&!el.checked){err=true;el.closest('.cb-group')?.classList.add('error');}
+      else if(el.type==='radio'){
+        if(!f.querySelector(`input[name="${el.name}"]:checked`)){err=true;document.getElementById('katErr').classList.add('show');}
+      }else if(!el.value.trim()){err=true;el.classList.add('invalid');}
+    });
+
+    // Familienmitglieder validieren (nur wenn Familie gewählt)
+    if(isFamily()){
+      famSec.querySelectorAll('.family-member input[required]').forEach(el=>{
+        if(!el.value.trim()){err=true;el.classList.add('invalid');}
+      });
+    }
+
+    // IBAN
+    const ic=ib.value.replace(/\s/g,'');
+    if(!valIBAN(ic).ok){err=true;ib.classList.add('invalid');ie.textContent='Bitte gib eine gültige IBAN ein.';ie.classList.add('show');}
+
+    // E-Mail
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value)){err=true;em.classList.add('invalid');ee.classList.add('show');}
+
+    if(err){
+      const fi=f.querySelector('.invalid,.error');
+      if(fi)fi.scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
+
+    // Daten sammeln
+    const data={
+      vorname:f.vorname.value.trim(),
+      nachname:f.nachname.value.trim(),
+      geburtsdatum:f.geburtsdatum.value,
+      strasse:f.strasse.value.trim(),
+      plz:f.plz.value.trim(),
+      ort:f.ort.value.trim(),
+      email:f.email.value.trim(),
+      telefon:f.telefon.value.trim(),
+      kategorie:f.querySelector('input[name="kategorie"]:checked').value,
+      kommentar:(document.getElementById('kommentar').value||'').trim(),
+      kontoinhaber:f.kontoinhaber.value.trim(),
+      iban:ic,
+      bic:f.bic.value.trim().toUpperCase(),
+      satzung:f.satzung.checked?'Ja':'Nein',
+      dsgvo:f.dsgvo.checked?'Ja':'Nein',
+      sepa_consent:f.sepa_consent.checked?'Ja':'Nein',
+      arbeitsdienst:f.arbeitsdienst.checked?'Ja':'Nein',
+      familienmitglieder: isFamily() ? getFamilyMembers() : [],
+      datum:new Date().toLocaleDateString('de-DE'),
+      zeitstempel:new Date().toISOString()
+    };
+
+    sb.disabled=true;sb.classList.add('loading');
+    try{
+      await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      f.style.display='none';
+      document.getElementById('okMsg').style.display='block';
+      window.scrollTo({top:0,behavior:'smooth'});
+    }catch(x){
+      console.error(x);
+      document.getElementById('errMsg').style.display='block';
+      sb.disabled=false;sb.classList.remove('loading');
+    }
+  });
+
+  // Reset errors
+  f.addEventListener('input',e=>{
+    const el=e.target;
+    el.classList.remove('invalid');
+    el.closest('.form-group')?.querySelector('.ferr')?.classList.remove('show');
+  });
+  f.querySelectorAll('input[type="checkbox"]').forEach(el=>{
+    el.addEventListener('change',()=>{el.closest('.cb-group')?.classList.remove('error');});
+  });
+});
+</script>
+</body>
+</html>
