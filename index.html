@@ -89,6 +89,13 @@
   input.invalid, select.invalid { border-color: var(--error); background: var(--error-bg); }
   input.valid { border-color: var(--success); }
 
+  /* Fehlende Pflichtfelder markieren */
+  input.missing, select.missing, textarea.missing { border-color: var(--error); background: var(--error-bg); }
+  .cb-group.missing { background: var(--error-bg); border-radius: var(--radius); padding: 6px 10px; margin: -6px -10px; border-left: 3px solid var(--error); }
+  .radio-grid.missing, #katGrp.missing { background: var(--error-bg); border-radius: var(--radius); padding: 8px; margin: -8px; }
+
+  .version { text-align: center; font-size: 11px; color: #aaa; margin-top: 24px; padding-bottom: 12px; }
+
   .iban-wrap { position: relative; }
   .iban-wrap input {
     padding-right: 38px;
@@ -432,6 +439,7 @@
       im Boulderverein Zugzwang e.V.
     </div>
   </form>
+  <div class="version">v1.2.1</div>
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
@@ -665,20 +673,26 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 
   // ── Button erst freigeben wenn alles ausgefüllt ──
+  let formTouched=false;
   function checkForm(){
     let ok=true;
 
     // Alle required Text/Date/Select-Felder in nicht-family sections
     f.querySelectorAll('.form-section:not(.family-section) input[required]:not([type="checkbox"]):not([type="radio"]), .form-section:not(.family-section) select[required]').forEach(el=>{
-      if(!el.value.trim()) ok=false;
+      if(!el.value.trim()){ok=false;if(formTouched)el.classList.add('missing');}
+      else{el.classList.remove('missing');}
     });
 
     // Kategorie (Radio)
-    if(!f.querySelector('input[name="kategorie"]:checked')) ok=false;
+    const katGrid=document.getElementById('katGrp');
+    if(!f.querySelector('input[name="kategorie"]:checked')){ok=false;if(formTouched&&katGrid)katGrid.classList.add('missing');}
+    else{if(katGrid)katGrid.classList.remove('missing');}
 
     // Checkboxen
     f.querySelectorAll('input[type="checkbox"][required]').forEach(el=>{
-      if(!el.checked) ok=false;
+      const grp=el.closest('.cb-group');
+      if(!el.checked){ok=false;if(formTouched&&grp)grp.classList.add('missing');}
+      else{if(grp)grp.classList.remove('missing');}
     });
 
     // E-Mail Format
@@ -694,13 +708,18 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(members.length===0) ok=false;
       members.forEach(div=>{
         div.querySelectorAll('input[required]').forEach(el=>{
-          if(!el.value.trim()) ok=false;
+          if(!el.value.trim()){ok=false;if(formTouched)el.classList.add('missing');}
+          else{el.classList.remove('missing');}
         });
       });
     }
 
     sb.disabled=!ok;
   }
+
+  // formTouched nach erster Eingabe aktivieren
+  f.addEventListener('input',()=>{formTouched=true;checkForm();},{once:true});
+  f.addEventListener('change',()=>{formTouched=true;checkForm();},{once:true});
 
   // Bei jeder Eingabe prüfen
   f.addEventListener('input',checkForm);
