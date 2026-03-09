@@ -94,6 +94,7 @@
     padding-right: 38px;
     font-family: "SF Mono", Consolas, Menlo, monospace;
     letter-spacing: 1px;
+    text-transform: uppercase;
   }
   .iban-ico {
     position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
@@ -703,4 +704,18 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   // Bei jeder Eingabe prüfen
   f.addEventListener('input',checkForm);
-  f.addEv
+  f.addEventListener('change',checkForm);
+  document.querySelectorAll('.cb-group input').forEach(el=>{
+    el.addEventListener('change',checkForm);
+  });
+
+  // Familienmitglieder: MutationObserver für dynamische Felder
+  const obs=new MutationObserver(checkForm);
+  obs.observe(famList,{childList:true,subtree:true,attributes:true});
+
+  // Initial prüfen
+  checkForm();
+});
+</script>
+</body>
+</html>
