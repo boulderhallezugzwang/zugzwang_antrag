@@ -382,8 +382,8 @@
       </div>
       <div class="form-row single">
         <div class="form-group">
-          <label for="bic">BIC (optional, bei internationalen Konten)</label>
-          <input type="text" id="bic" name="bic" placeholder="z.B. COBADEFFXXX" autocomplete="off"
+          <label for="bic">BIC</label>
+          <input type="text" id="bic" name="bic" placeholder="Wird automatisch ermittelt" autocomplete="off"
                  style="font-family:'SF Mono',Consolas,Menlo,monospace;letter-spacing:1px;">
         </div>
       </div>
@@ -439,7 +439,7 @@
       im Boulderverein Zugzwang e.V.
     </div>
   </form>
-  <div class="version">v1.2.2</div>
+  <div class="version">v1.3.0</div>
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
@@ -560,6 +560,18 @@ document.addEventListener('DOMContentLoaded',()=>{
         ib.classList.add('valid');ib.classList.remove('invalid');
         ico.textContent='✓';ico.style.color='var(--success)';
         ie.classList.remove('show');ih.style.display='none';
+        // BIC automatisch ermitteln (deutsche IBANs)
+        if(r.substring(0,2)==='DE'){
+          const blz=r.substring(4,12);
+          fetch('https://openiban.com/validate/'+r+'?getBIC=true')
+            .then(resp=>resp.json())
+            .then(d=>{
+              if(d.bankData&&d.bankData.bic){
+                document.getElementById('bic').value=d.bankData.bic;
+              }
+            })
+            .catch(()=>{});
+        }
       }else{
         ib.classList.add('invalid');ib.classList.remove('valid');
         ico.textContent='✗';ico.style.color='var(--error)';ih.style.display='none';
